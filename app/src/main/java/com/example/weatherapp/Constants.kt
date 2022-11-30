@@ -9,6 +9,10 @@ import android.os.Build
 // START
 object Constants {
 
+    const val APP_ID : String = "fc3b90ce0a6ba52735abbc56fee4c26b"
+    const val BASE_URL : String = "https://api.openweathermap.org/data/"
+    const val METRIC_UNIT : String = "metric"
+
     // TODO (STEP 3: Add a function to check the network connection is available or not.)
     /**
      * Verifica se o aparelho está conectado a internet.

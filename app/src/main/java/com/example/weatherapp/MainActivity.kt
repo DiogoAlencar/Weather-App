@@ -17,12 +17,15 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import com.example.weatherapp.models.WeatherResponse
+import com.example.weatherapp.network.WeatherService
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import retrofit.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -88,14 +91,14 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun requestLocationData() {
 
-        val mLocationRequest = LocationRequest()
-        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        /*val mLocationRequest = LocationRequest()
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY*/
 
-        /*val mLocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+        val mLocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
             .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(500)
-            .setMaxUpdateDelayMillis(1000)
-            .build()*/
+            //.setMinUpdateIntervalMillis(5000)
+            //.setMaxUpdateDelayMillis(10000)
+            .build()
 
 
         mFusedLocationClient.requestLocationUpdates(
@@ -115,7 +118,9 @@ class MainActivity : AppCompatActivity() {
             Log.i("Current Longitude", "$longitude")
 
             // TODO (STEP 7: Call the api calling function here.)
-            getLocationWeatherDetails()
+            if (latitude != null && longitude != null) {
+                getLocationWeatherDetails(latitude, longitude)
+            }
         }
     }
 
@@ -153,7 +158,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Function is used to get the weather details of the current location based on the latitude longitude
      */
-    private fun getLocationWeatherDetails(){
+    private fun getLocationWeatherDetails(latitude : Double, longitude : Double){
 
         // TODO (STEP 6: Here we will check whether the internet
         //  connection is available or not using the method which
@@ -161,11 +166,53 @@ class MainActivity : AppCompatActivity() {
         // START
         if (Constants.isNetworkAvailable(this@MainActivity)) {
 
-            Toast.makeText(
-                this@MainActivity,
-                "You have connected to the internet. Now you can make an api call.",
-                Toast.LENGTH_SHORT
-            ).show()
+            val retrofit : Retrofit = Retrofit.Builder()
+                .baseUrl(Constants.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val service : WeatherService = retrofit.create(WeatherService::class.java)
+
+            val listCall : Call<WeatherResponse> = service.getWeather(
+                latitude,
+                longitude,
+                Constants.METRIC_UNIT,
+                Constants.APP_ID
+            )
+
+            listCall.enqueue(object  : Callback<WeatherResponse>{
+                override fun onResponse(response: Response<WeatherResponse>?, retrofit: Retrofit?) {
+
+                    if (response!!.isSuccess) {
+
+                        val weatherList : WeatherResponse = response.body()
+                        Log.i("Response Result", weatherList.name)
+
+                    } else {
+
+                        val rc = response.code()
+                        when(rc) {
+                            400 -> {
+                                Log.e("Error 400", "Bad connection")
+                            }
+                            404 -> {
+                                Log.e("Error 404", "Not Found")
+                            }
+                            else -> {
+                                Log.e("Error", "Generic error")
+                            }
+                        }
+
+                    }
+
+                }
+
+                override fun onFailure(t: Throwable?) {
+                    Log.e("Errorrr", t!!.message.toString())
+                }
+
+            })
+
         } else {
             Toast.makeText(
                 this@MainActivity,
