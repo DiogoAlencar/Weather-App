@@ -2,6 +2,7 @@ package com.example.weatherapp
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -9,14 +10,17 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.models.WeatherResponse
 import com.example.weatherapp.network.WeatherService
 import com.google.android.gms.location.*
@@ -26,19 +30,28 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import retrofit.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     // Localização de latitude e longetude
     private lateinit var mFusedLocationClient : FusedLocationProviderClient
+    private var mProgressDialog : Dialog? = null
+
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         // https://api.openweathermap.org/data/2.5/weather?lat=37.4219983&lon=-122.084&appid=fc3b90ce0a6ba52735abbc56fee4c26b
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+
 
         if (!isLocationEnabled()) {
             Toast.makeText(
@@ -94,10 +107,11 @@ class MainActivity : AppCompatActivity() {
         /*val mLocationRequest = LocationRequest()
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY*/
 
-        val mLocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+        val mLocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
             .setWaitForAccurateLocation(false)
             //.setMinUpdateIntervalMillis(5000)
             //.setMaxUpdateDelayMillis(10000)
+            .setMaxUpdates(1) // chama a requisição apenas uma vezf
             .build()
 
 
@@ -180,12 +194,19 @@ class MainActivity : AppCompatActivity() {
                 Constants.APP_ID
             )
 
+            showCustomProgressDialog()
+
             listCall.enqueue(object  : Callback<WeatherResponse>{
+                @RequiresApi(Build.VERSION_CODES.N)
                 override fun onResponse(response: Response<WeatherResponse>?, retrofit: Retrofit?) {
 
                     if (response!!.isSuccess) {
 
+                        hideProgressDialog()
+
                         val weatherList : WeatherResponse = response.body()
+                        setupUi(weatherList)
+
                         Log.i("Response Result", weatherList.name)
 
                     } else {
@@ -208,6 +229,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(t: Throwable?) {
+                    hideProgressDialog()
                     Log.e("Errorrr", t!!.message.toString())
                 }
 
@@ -223,5 +245,54 @@ class MainActivity : AppCompatActivity() {
         // END
     }
     // END
+
+    private fun showCustomProgressDialog() {
+        mProgressDialog = Dialog(this)
+        mProgressDialog!!.setContentView(R.layout.dialog_custom_progress)
+        mProgressDialog!!.show()
+    }
+
+    private fun hideProgressDialog() {
+        if (mProgressDialog != null) {
+            mProgressDialog!!.dismiss()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun setupUi(weatherList : WeatherResponse) {
+
+        for (i in weatherList.weather.indices) {
+            binding.tvMain.text = weatherList.weather[i].main
+            binding.tvMainDescription.text = weatherList.weather[i].description
+            binding.tvTemp.text = weatherList.main.temp.toString() + getUnit(application.resources.configuration.locales.toString())
+            binding.tvSunriseTime.text = unixTime(weatherList.sys.sunrise)
+            binding.tvSunsetTime.text = unixTime(weatherList.sys.sunset)
+            binding.tvMin.text = weatherList.main.temp_min.toString()
+            binding.tvMax.text = weatherList.main.temp_max.toString()
+            binding.tvSpeed.text = weatherList.wind.speed.toString()
+            binding.tvSpeedUnit.text = weatherList.wind.deg.toString()
+            binding.tvName.text = weatherList.name
+            binding.tvCountry.text = weatherList.sys.country
+
+            Log.i("Weather name", weatherList.weather.toString())
+        }
+
+    }
+
+    private fun getUnit(value : String) : String? {
+        var valor = "ºC"
+        if ("US" == value || "LR" == value || "MM" == value){
+            valor = "ºF"
+        }
+        return valor
+    }
+
+    private fun unixTime(timex: Long) : String? {
+        Log.i("hora", timex.toString())
+        val date = Date(timex * 1000L)
+        val sdf = SimpleDateFormat("HH:mm", Locale.US)
+        sdf.timeZone = TimeZone.getDefault()
+        return sdf.format(date)
+    }
 
 }
