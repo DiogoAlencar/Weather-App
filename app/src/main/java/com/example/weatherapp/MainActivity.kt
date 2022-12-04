@@ -39,8 +39,9 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    // Localização de latitude e longetude
+    // 3º Localização de latitude e longetude
     private lateinit var mFusedLocationClient : FusedLocationProviderClient
+
     private var mProgressDialog : Dialog? = null
 
     private lateinit var binding: ActivityMainBinding
@@ -57,6 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         // https://api.openweathermap.org/data/2.5/weather?lat=37.4219983&lon=-122.084&appid=fc3b90ce0a6ba52735abbc56fee4c26b
 
+        // 4º LOCALIZAÇÃO
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // SHAREDPREFERENCES
@@ -80,6 +82,9 @@ class MainActivity : AppCompatActivity() {
 
         } else {
 
+            // DEXTER - PERMISSÕES
+            // 3º VERIFICA SE JÁ FOI DADA PERMISSÃO, CASO SEJA A 1º VEZ, SOLICITA PERMISSÃO,
+            // CASO USUARIO NÃO TENHA CONCEDIDO PERMISSÃO, MOSTRA MSG EXPLICANDO E PEDINDO PERMISSÃO
             Dexter.withActivity(this)
                 .withPermissions(
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -92,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                             requestLocationData()
                         }
 
-                        if (report!!.isAnyPermissionPermanentlyDenied) {
+                        if (report.isAnyPermissionPermanentlyDenied) {
                             Toast.makeText(
                                 this@MainActivity,
                                 "Você não permitiu a localização",
@@ -121,14 +126,15 @@ class MainActivity : AppCompatActivity() {
         /*val mLocationRequest = LocationRequest()
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY*/
 
+        // 4º LOCALIZAÇÃO - REQUISIÇÃO DE LOCALIZAÇÃO
         val mLocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
             .setWaitForAccurateLocation(false)
             //.setMinUpdateIntervalMillis(5000)
             //.setMaxUpdateDelayMillis(10000)
-            .setMaxUpdates(1) // chama a requisição apenas uma vezf
+            .setMaxUpdates(1) // chama a requisição apenas uma vez
             .build()
 
-
+        // 6º LOCALIZAÇÃO
         mFusedLocationClient.requestLocationUpdates(
             mLocationRequest,
             mLocationCallBack,
@@ -136,6 +142,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    // 5º LOCALIZAÇÃO - RECUPERA DADOS DE LOCALIZAÇÃO
     private val mLocationCallBack = object : LocationCallback() {
         override fun onLocationResult(locationResult : LocationResult) {
             val mLastLocation : Location? = locationResult.lastLocation
@@ -159,6 +166,7 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton("Configurações") {_, _ ->
                 try {
 
+                    // DIRECIONA USUARIO PARA AS CONFIGURAÇÕES DE PERMISSÕES DO APARELHO, PARA O APP.
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     val uri = Uri.fromParts("package", packageName, null)
                     intent.data = uri
