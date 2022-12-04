@@ -3,5 +3,6 @@
 
     <string name="please_wait">Please Wait&#8230;</string>
     <string name="image_contentDescription">image</string>
-    <string name="miles_per_hour">miles/hour</string>
+    <string name="kilometers_per_hour">Km/h</string>
+    <string name="action_refresh">refresh</string>
 </resources>

@@ -9,8 +9,11 @@
         <entry key="app/src/main/res/drawable/humidity.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/location.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/morning.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/temperature.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/wind.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="app/src/main/res/layout/dialog_custom_progress.xml" value="0.19375" />
+        <entry key="app/src/main/res/menu/menu_main.xml" value="0.19270833333333334" />
       </map>
     </option>
   </component>

@@ -12,6 +12,9 @@ object Constants {
     const val APP_ID : String = "fc3b90ce0a6ba52735abbc56fee4c26b"
     const val BASE_URL : String = "https://api.openweathermap.org/data/"
     const val METRIC_UNIT : String = "metric"
+    const val LANGUAGE : String = "pt_br"
+    const val PREFERENCE_NAME = "WeatherAppPreference"
+    const val WEATHER_RESPONSE_DATA = "weather_response_data"
 
     // TODO (STEP 3: Add a function to check the network connection is available or not.)
     /**

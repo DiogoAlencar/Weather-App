@@ -170,7 +170,7 @@
                         android:textColor="@color/primary_text_color"
                         android:textSize="@dimen/label_text_size"
                         android:textStyle="bold"
-                        tools:text="Minimun"/>
+                        tools:text="10.23 max"/>
 
                     <TextView
                         android:id="@+id/tv_max"
@@ -179,7 +179,7 @@
                         android:gravity="end"
                         android:textColor="@color/secondary_text_color"
                         android:textSize="@dimen/value_text_size"
-                        tools:text="Maximum"/>
+                        tools:text="10.23 min"/>
 
                 </LinearLayout>
 
@@ -234,7 +234,7 @@
                         android:gravity="end"
                         android:textColor="@color/secondary_text_color"
                         android:textSize="@dimen/value_text_size"
-                        tools:text="0"/>
+                        android:text="@string/kilometers_per_hour"/>
 
                 </LinearLayout>
 
