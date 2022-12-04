@@ -5,4 +5,5 @@ tools:<br>
 2 - LocationRequest;<br>
 3 - Custom Dialog;<br>
 4 - Gson converter;<br>
-5 - SharedPreference.
+5 - SharedPreference;<br>
+6 - Dexter para permiss
